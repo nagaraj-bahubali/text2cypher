@@ -1,0 +1,57 @@
+fine_tuning:
+  base_model: 'codellama/CodeLlama-13b-Instruct-hf'
+  fine_tuned_model: 'fine_tuned_models/exp_1-13b-Instruct-hf'
+  dataset_path: 'datasets/nl2cypher_30.parquet'
+   
+  tokenizer:
+    padding_side: 'right'
+
+  model:
+    low_cpu_mem_usage: true
+    device_map: 'auto'
+    local_files_only: true
+
+  quant_config:
+    load_in_4bit: true
+    bnb_4bit_quant_type: 'nf4'
+    bnb_4bit_use_double_quant: false
+
+  peft_args:
+    lora_alpha: 16
+    lora_dropout: 0.1
+    r: 64
+    bias: "none"
+    task_type: "CAUSAL_LM"
+  
+  training_params:
+    output_dir: "outputs/exp_1"
+    num_train_epochs: 1
+    per_device_train_batch_size: 1
+    gradient_accumulation_steps: 16
+    optim: "paged_adamw_32bit"
+    save_steps: 25
+    logging_steps: 25
+    learning_rate: 0.0002
+    weight_decay: 0.001
+    fp16: false
+    bf16: false
+    max_grad_norm: 0.3
+    max_steps: -1
+    warmup_ratio: 0.03
+    group_by_length: true
+    lr_scheduler_type: "constant"
+
+
+inference:
+  base_model: 'codellama/CodeLlama-13b-Instruct-hf'
+  fine_tuned_model: 'fine_tuned_models/exp_1-13b-Instruct-hf'
+
+  model:
+    low_cpu_mem_usage: true
+    device_map: 'auto'
+    local_files_only: true
+    return_dict: true
+
+  pipeline:
+    task: 'text-generation'
+    max_length: 3000
